@@ -6,7 +6,7 @@ import Resume from './pages/Resume'
 import Saved from './pages/Saved'
 import View from './pages/View'
 import Info from './pages/Info'
-import Pnf from './pages/Pnf'
+import Pagenot from './pages/Pagenot'
 import Download from './pages/Download'
 import Header from './components/Header'
 import Footer from './components/Footer'
@@ -24,7 +24,7 @@ function App() {
         <Route path='/all-resume' element={<Saved />}></Route> 
         <Route path='/resume/:id' element={<View />}></Route>
         <Route path='/downloads' element={<Download />}></Route>
-        <Route path='/*' element={<Pnf/>}></Route>
+        <Route path='/*' element={<Pagenot/>}></Route>
       </Routes>
       <Footer/>
 
