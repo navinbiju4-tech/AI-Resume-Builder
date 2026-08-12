@@ -13,18 +13,18 @@ import Select from '@mui/material/Select';
 import jobRole from '../assets/jobRole (1).json'
 import jobSkills from '../assets/jobSkills.json'
 import summaries from '../assets/summaries.json'
+import { saveResumeApi } from '../services/apiService';
+import { toast } from 'react-toastify';  //similar to alert
+import { useNavigate } from 'react-router-dom';
+
 
 const steps = ['Basic Informations', 'Contact Details', 'Education Details', 'Review ans Submit'];
 
-function ResumeInput() {
-
-  const [resumeDetails, setResumeDetails] = React.useState({
-    fullName: "", location: "", job: "", email: "", phone: "", linkedin: "", github: "", degree: "", college: "", year: "", skills: [],
-    summary: ""
-  })
+function ResumeInput({ resumeDetails, setResumeDetails }) {
 
   console.log(resumeDetails);
-
+ 
+   const navigate = useNavigate()
 
   const [activeStep, setActiveStep] = React.useState(0);
 
@@ -55,7 +55,7 @@ function ResumeInput() {
                 id="demo-simple-select"
                 label="Job" >
                 {
-                  jobRole.jobRoles.map(job=> (
+                  jobRole.jobRoles.map(job => (
                     <MenuItem key={job} value={job}>{job}</MenuItem>))
                 }
 
@@ -99,8 +99,10 @@ function ResumeInput() {
         break;
       case 3: return (
         <div>
-          <p>Our Ai will generate skills & summary according to your job role. click the <b>
-            Generate Ai Skills & Summary</b> button to procced</p>
+          <p>Our Ai will generate skills & summary according to your job role.   once the
+             form get submitted user won't get  the chance to update the resume details. if you want to procced
+             please click the<b> Generate Ai Skills & Summary</b> button to procced.</p>
+            
         </div>
       )
         break;
@@ -112,12 +114,33 @@ function ResumeInput() {
 
 
   }
-    
-  const generateSkillAndSummary = ()=>{
-    setResumeDetails({...resumeDetails,skills:jobSkills[resumeDetails.job],summary:summaries[resumeDetails.job]})
-    handleBack()
+
+  const generateSkillAndSummary = () => {
+    setResumeDetails({ ...resumeDetails, skills: jobSkills[resumeDetails.job], summary: summaries[resumeDetails.job] })
+    handleNext()
   }
-  
+
+  const handleSaveResume = async () => {
+    // make api call to save resumeinput should execute when finish button is clicked 
+    const { fullName, location, job, email, phone, github, linkedin, degree, college, year, skills, summary } = resumeDetails
+    if (fullName && location && job && email && phone && github && linkedin && degree && college && year && skills.length > 0 && summary) {
+      //  api call
+     const response = await saveResumeApi(resumeDetails)
+     console.log(response);
+     if(response.status==201){
+      toast.success("Resume added successfully")
+      const resumeId = response.data.id
+      setTimeout(()=>{
+        navigate(`/resume/${resumeId}`)
+      },2500);
+     }
+    } else {
+      toast.warning("please fill the form completely")
+    }
+  }
+
+
+
   return (
     <Box sx={{ width: '100%' }}>
       <Stepper activeStep={activeStep}>
@@ -138,7 +161,7 @@ function ResumeInput() {
           </Typography>
           <Box sx={{ display: 'flex', flexDirection: 'row', pt: 2 }}>
             <Box sx={{ flex: '1 1 auto' }} />
-            <Button>
+            <Button onClick={handleSaveResume}>
               FINISH
             </Button>
           </Box>

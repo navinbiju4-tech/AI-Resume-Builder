@@ -1,6 +1,5 @@
 
 import { Route, Routes } from 'react-router-dom'
-import './App.css'
 import Home from './pages/Home'
 import Resume from './pages/Resume'
 import Saved from './pages/Saved'
@@ -10,24 +9,25 @@ import Pagenot from './pages/Pagenot'
 import Download from './pages/Download'
 import Header from './components/Header'
 import Footer from './components/Footer'
+import { ToastContainer } from 'react-toastify';
 
 function App() {
 
 
   return (
     <>
-     <Header/>
+      <Header />
       <Routes>
         <Route path='/' element={<Home />}></Route>
         <Route path='/resume' element={<Resume />}></Route>
         <Route path='/resume-details' element={<Info />}></Route>
-        <Route path='/all-resume' element={<Saved />}></Route> 
+        <Route path='/all-resume' element={<Saved />}></Route>
         <Route path='/resume/:id' element={<View />}></Route>
         <Route path='/downloads' element={<Download />}></Route>
-        <Route path='/*' element={<Pagenot/>}></Route>
+        <Route path='/*' element={<Pagenot />}></Route>
       </Routes>
-      <Footer/>
-
+      <Footer />
+      <ToastContainer  position='top-center' theme='colored' autoClose={3000}/>
     </>
   )
 }

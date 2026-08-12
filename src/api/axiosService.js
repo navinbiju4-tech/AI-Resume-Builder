@@ -1,6 +1,6 @@
 import axiosInstance from "./axiosInstance";
 
-const axiosService = async (httpMethod,URL,reqBody)=>{
+const axiosService = async (httpMethod,url,reqBody)=>{
     try{
         const response = await axiosInstance({
             method:httpMethod,
