@@ -11,6 +11,9 @@ import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
 import { FaXmark } from "react-icons/fa6";
 import jobRole from '../assets/jobRole (1).json'
+import { toast } from 'react-toastify';
+import { editResumeApi } from '../services/apiService';
+
 
 
 const style = {
@@ -32,10 +35,43 @@ function Edit({ resumeDetails, setResumeDetails }) {
   const [open, setOpen] = React.useState(false);
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
+  const skillRef = React.useRef()
 
   const removeSkill = (skill)=>{
     setResumeDetails({...resumeDetails,skills:resumeDetails.skills.filter(item=>item!=skill)})
   }
+  
+  const addSkill = (skill)=>{
+    if(skill){
+      if(resumeDetails?.skills?.map(item=>item.toLowerCase()).includes(skill.toLowerCase())){
+        toast.warning("Given skill is already available... please add another!!! ")
+      }else{
+        setResumeDetails({...resumeDetails,skills:[...resumeDetails?.skills,skill]})
+      }
+      skillRef.current.value = ""
+    }else{
+      toast.info("input valid skill")
+    }
+  }
+
+
+   const handleUpdateResume = async () => {
+      // make api call to save resumeinput should execute when finish button is clicked 
+      const { fullName, location, job, email, phone, github, linkedin, degree, college, year, skills, summary } = resumeDetails
+      if (fullName && location && job && email && phone && github && linkedin && degree && college && year && skills.length > 0 && summary) {
+        //  api call
+       const response = await editResumeApi(resumeDetails.id,resumeDetails)
+       console.log(response);
+       if(response.status==200){
+        toast.success("Resume updated successfully")
+        handleClose()
+       }
+      } else {
+        toast.info("please fill the form completely")
+      }
+    }
+  
+
 
   return (
     <div>
@@ -108,9 +144,9 @@ function Edit({ resumeDetails, setResumeDetails }) {
             <div>
               <h3>skills</h3>
               <div className='d-flex p-3'>
-                <input type='text' placeholder='Add new skills'
+                <input ref={skillRef} type='text' placeholder='Add new skills'
                   className='form-control'></input>
-                <Button>ADD</Button>
+                <Button onClick={()=>addSkill(skillRef.current.value)}>ADD</Button>
               </div>
               <h6>Added Skills :</h6>
               <div className='p-3 d-flex justify-content-between flex-wrap'>
@@ -130,7 +166,7 @@ function Edit({ resumeDetails, setResumeDetails }) {
               </div>
             </div>
             {/* update button */}
-            <button className='btn text-light mt-3' style={{ backgroundColor: '#213a5d' }}>UPDATE CV</button>
+            <button onClick={handleUpdateResume} className='btn text-light mt-3' style={{ backgroundColor: '#213a5d' }}>UPDATE CV</button>
           </Box>
         </Box>
       </Modal>
