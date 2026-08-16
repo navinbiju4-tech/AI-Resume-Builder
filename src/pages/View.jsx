@@ -6,39 +6,69 @@ import Edit from '../components/Edit'
 import { IoDocumentTextOutline } from "react-icons/io5";
 import { MdHistory } from "react-icons/md";
 import { IoMdHome } from "react-icons/io";
-import { viewResumeApi } from '../services/apiService';
+import { downloadResumeApi, viewResumeApi } from '../services/apiService';
 import { jsPDF } from "jspdf";
 import html2canvas from 'html2canvas';
 
+
+
 function View() {
-   
-  const previewRef=useRef()
-  const[resume,setResume]=useState({})
-  const {id} = useParams()
+
+  const previewRef = useRef()
+  const [resume, setResume] = useState({})
+  const { id } = useParams()
   console.log(resume);
 
-  useEffect(()=>{
+  useEffect(() => {
     getResumeDetails()
-  },[])
-  
-  const getResumeDetails = async ()=>{
+  }, [])
+
+  const getResumeDetails = async () => {
     const response = await viewResumeApi(id)
-    if(response.status=200){
+    if (response.status = 200) {
       setResume(response.data)
     }
   }
 
-  const downloadCV = async()=>{
+  const downloadCV = async () => {
+
     const previewTag = previewRef.current
     const canvas = await html2canvas(previewTag)
+    canvas.toBlob(async (imgFile) => {
+      // create formData to send file via api 
+      const formData = new FormData()
+      formData.append("file", imgFile)
+      formData.append("upload_preset", "resumes")
+      // generate resume img from cloudinary - api call
+      const result = await fetch("https://api.cloudinary.com/v1_1/ucml3oye/image/upload", {
+        method: "POST",
+        body: formData
+      })
+
+      const serverData = await result.json()
+      const url = serverData.secure_url
+      console.log(url);
+      generatePDF(url)
+    })
+
+  }
+
+  const generatePDF = async (resumeImg) => {
     const pdf = new jsPDF()
     const imageWidth = pdf.internal.pageSize.getWidth()
     const imageHeight = pdf.internal.pageSize.getHeight()
-    pdf.addImage(canvas,"PNG",0,0,imageWidth,imageHeight)
-    pdf.save("resume.pdf")
-  }
-  
+    pdf.addImage(resumeImg, "PNG", 0, 0, imageWidth, imageHeight)
+    // api call to save download resume details in json
+    const today = new Date()
+    const timestamp = `${today.toLocaleDateString()},${today.toLocaleTimeString()}`
 
+    const result = await downloadResumeApi({ timestamp, resumeImg, resumeId: resume.id, jobRole: resume.job })
+    if (result.status == 201) {
+      // to download cv as pdf when api call become success
+      pdf.save(`${resume.fullName}-CV.pdf`)
+    }
+
+  }
 
 
 
@@ -57,7 +87,7 @@ function View() {
             </button>
 
             {/* edit */}
-            <Edit  resumeDetails = {resume} setResumeDetails = {setResume}/>
+            <Edit resumeDetails={resume} setResumeDetails={setResume} />
 
             {/* all resume */}
             {/* <Link to={'/all-resume'} style={{ color: '#714a2f' }} className="btn "><IoDocumentTextOutline className='fs-3' />
@@ -68,13 +98,13 @@ function View() {
               Download History</Link>
                */}
             {/* back */}
-            <Link to={'/resume-details'} style={{color:'#714a2f'}} className="btn  "><IoMdHome className='fs-3' />
-             Home</Link>
+            <Link to={'/resume-details'} style={{ color: '#714a2f' }} className="btn  "><IoMdHome className='fs-3' />
+              Home</Link>
 
           </div>
           {/* preview componenets */}
           <div ref={previewRef} className="p-5">
-           <Preview resumeDetails={resume}/>
+            <Preview resumeDetails={resume} />
           </div>
         </div>
         <div className="col-lg-2"></div>
