@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useMemo } from 'react'
 import { Link } from 'react-router-dom'
-import { FaTrash } from "react-icons/fa";
+import { FaBackward, FaForward, FaTrash } from "react-icons/fa";
 import { deletelResumeApi, getAllResumeApi } from '../services/apiService';
 import { resume } from 'react-dom/server';
 import { CiSearch } from "react-icons/ci";
+
+
 
 function Saved() {
 
@@ -12,6 +14,14 @@ function Saved() {
   const [searchKey, setSearchKey] = useState("")
 
   const [dummyAllResumes, setDummyAllResumes] = useState([])
+
+  const [currentPage, setCurrentPage] = useState(1)
+
+  const rowsPerPage = 4;
+  const lastIndexofCurrentPage = currentPage * rowsPerPage
+  const firstIndexOfCurrentPage = lastIndexofCurrentPage - rowsPerPage
+  const currentResumes = allResumes.slice(firstIndexOfCurrentPage,lastIndexofCurrentPage)
+  const totalPage = Math.ceil(allResumes.length/rowsPerPage)
 
   console.log(searchKey);
 
@@ -55,7 +65,7 @@ function Saved() {
         making the recruitment and candidate-selection process more organized and efficient.</p>
 
       <div className='d-flex justify-content-center align-items-center w-50'>
-        <input onChange={(e) => setSearchKey(e.target.value)} type="text" placeholder='Search Candidate By Search Roles' className="form-control" />
+        <input onChange={(e) =>{setSearchKey(e.target.value);setCurrentPage(1)}} type="text" placeholder='Search Candidate By Search Roles' className="form-control" />
         <CiSearch style={{ marginLeft: '-30px' }} />
       </div>
       <table className="my-5 table table-hover table-stripped">
@@ -69,8 +79,8 @@ function Saved() {
         </thead>
         <tbody>
           {
-            allResumes?.length > 0 ?
-              allResumes?.map((resume, index) => (
+            currentResumes?.length > 0 ?
+              currentResumes?.map((resume, index) => (
                 <tr key={resume?.id}>
                   <td>{index + 1}</td>
                   <td><Link to={`/resume/${resume?.id}`}>{resume?.fullName.toUpperCase()}</Link></td>
@@ -83,6 +93,17 @@ function Saved() {
           }
         </tbody>
       </table>
+      <div className='d-flex align-items-center'>
+        <button className='btn'onClick={()=>setCurrentPage(currentPage-1)} 
+         disabled={currentPage==1}>
+          <FaBackward/>
+        </button>
+        {currentPage} of {totalPage}
+         <button className='btn' onClick={()=>setCurrentPage(currentPage+1)} 
+         disabled={currentPage==totalPage || totalPage==0}>
+          <FaForward/>
+        </button>
+      </div>
     </div>
   )
 }
